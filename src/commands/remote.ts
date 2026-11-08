@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import pc from "picocolors";
-import { getPeer } from "../core/config.ts";
+import { allPeers, getPeer } from "../core/config.ts";
 import { fromHome, isInsideHome } from "../core/paths.ts";
+import { interactive } from "../core/proc.ts";
 import { transfer } from "../core/rsync.ts";
 import { PROJECT_EXCLUDES } from "../core/scopes.ts";
 import { sh, shq, shTty } from "../core/ssh.ts";
@@ -51,7 +52,14 @@ export async function claudeCommand(
   }
 }
 
-export async function loginCommand(flags: { on?: string }) {
+export async function loginCommand(flags: { on?: string; here?: boolean }) {
+  if (flags.here || (!flags.on && allPeers().length === 0)) {
+    ui.gap();
+    ui.info("Signing in to Claude Code on this Mac.");
+    ui.gap();
+    process.exitCode = await interactive("claude", ["auth", "login"]);
+    return;
+  }
   const peer = getPeer(flags.on);
   ui.gap();
   ui.info(

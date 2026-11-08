@@ -224,7 +224,10 @@ export function run() {
 
   program
     .command("login")
-    .description("sign in to Claude Code on the other Mac")
+    .description(
+      "sign in to Claude Code on the other Mac (or this one, when nothing is paired)",
+    )
+    .option("--here", "sign in on this Mac instead")
     .action(guard((_o: unknown, cmd: Command) => loginCommand(globals(cmd))));
 
   program
