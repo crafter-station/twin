@@ -1,0 +1,56 @@
+{
+  "name": "@crafter/twin",
+  "version": "0.1.0",
+  "description": "Make every Mac feel like the same Claude Code. Sync sessions, memory, skills and settings between Macs, and delegate work to a Mac mini.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Cristian Correa",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crafter-station/twin.git"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "sync",
+    "mac-mini",
+    "agents",
+    "cli",
+    "rsync",
+    "remote"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "skill"
+  ],
+  "bin": {
+    "twin": "dist/bin/twin.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "os": [
+    "darwin"
+  ],
+  "scripts": {
+    "dev": "bun run bin/twin.ts",
+    "build": "tsup",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^14.0.3",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.7.0"
+  }
+}
