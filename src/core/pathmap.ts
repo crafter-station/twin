@@ -14,7 +14,17 @@ const SAME_NAME = "(?![A-Za-z0-9_.-])";
 const PROJECTS = ".claude/projects/";
 
 function swapText(text: string, from: string, to: string) {
-  return text.replace(new RegExp(`${literal(from)}${SAME_NAME}`, "g"), to);
+  const paths = text.replace(
+    new RegExp(`${literal(from)}${SAME_NAME}`, "g"),
+    to,
+  );
+  return paths.replace(
+    new RegExp(
+      `/\\.claude/projects/${literal(encode(from))}(?![A-Za-z0-9])`,
+      "g",
+    ),
+    `/.claude/projects/${encode(to)}`,
+  );
 }
 
 function swapKey(rel: string, from: string, to: string) {
