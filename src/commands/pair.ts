@@ -50,7 +50,7 @@ function nameFor(remoteHost: string) {
 function writeSshAlias(peers: Peer[]) {
   const blocks = peers.map(
     (p) =>
-      `Host ${p.name}\n  HostName ${p.host}\n  User ${p.user}\n  ControlMaster auto\n  ControlPath ${PATHS.sockets}/%C\n  ControlPersist 180\n`,
+      `Host ${p.name}\n  HostName ${p.host}\n  User ${p.user}\n  ControlMaster auto\n  ControlPath ${PATHS.sockets}/%C\n  ControlPersist 180\n  StrictHostKeyChecking accept-new\n`,
   );
   writeText(PATHS.sshConfig, `${blocks.join("\n")}`);
   const userConfig = join(HOME, ".ssh", "config");
