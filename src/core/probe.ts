@@ -43,7 +43,7 @@ if [ -n "$c" ]; then
 fi
 echo "sleep=$(pmset -g 2>/dev/null | awk '$1=="sleep"{print $2}')"
 echo "cleanup=$(grep -o '"cleanupPeriodDays"[^,}]*' "$HOME/.claude/settings.json" 2>/dev/null | grep -o '[0-9][0-9]*')"
-launchctl print gui/$(id -u)/${RC_LABEL} >/dev/null 2>&1 && echo rc=1 || echo rc=0
+launchctl print gui/$(id -u)/${RC_LABEL} >/dev/null 2>&1 && ! tail -n 5 "$HOME/.twin/rc.log" 2>/dev/null | grep -q "got no answer" && echo rc=1 || echo rc=0
 n=0
 for f in "$HOME"/.twin/jobs/*.pid; do [ -f "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && n=$((n+1)); done
 echo "jobs=$n"
