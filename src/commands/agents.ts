@@ -22,7 +22,7 @@ import {
 } from "../core/paths.ts";
 import { probeRemote } from "../core/probe.ts";
 import { selfCommand, skillText } from "../core/self.ts";
-import { sh, shq } from "../core/ssh.ts";
+import { sh, shq, shTty } from "../core/ssh.ts";
 import { emit, spinner, ui } from "../ui/out.ts";
 
 const SKILL_TARGET = join(CLAUDE_DIR, "skills", "twin", "SKILL.md");
@@ -117,6 +117,15 @@ export async function enableRc(peer: Peer, rel: string, mode: string) {
   });
 }
 
+const CONSENT = /got no answer/;
+
+async function startRc(peer: Peer, rel: string, mode: string) {
+  await sh(peer, 'mkdir -p "$HOME/.twin" && : > "$HOME/.twin/rc.log"');
+  await enableRc(peer, rel, mode);
+  await new Promise((r) => setTimeout(r, 6000));
+  return (await sh(peer, 'tail -n 30 "$HOME/.twin/rc.log" 2>/dev/null')).stdout;
+}
+
 export async function rcCommand(
   action: string | undefined,
   flags: { on?: string; dir?: string; mode?: string },
@@ -125,12 +134,46 @@ export async function rcCommand(
   if (action === "on") {
     const cwd = process.cwd();
     const rel = flags.dir ?? (isInsideHome(cwd) ? fromHome(cwd) : "");
+    const mode = flags.mode ?? "auto";
     const spin = spinner(`Starting Remote Control on ${peer.name}`);
-    await enableRc(peer, rel, flags.mode ?? "auto");
-    await new Promise((r) => setTimeout(r, 4000));
-    const log = (await sh(peer, 'tail -n 20 "$HOME/.twin/rc.log" 2>/dev/null'))
-      .stdout;
+    let log = await startRc(peer, rel, mode);
     spin.stop();
+    if (CONSENT.test(log)) {
+      if (!process.stdin.isTTY) {
+        throw new TwinError(
+          "needs_consent",
+          `Claude Code on ${peer.name} asks once before enabling Remote Control.`,
+          "Run `twin rc on` in a terminal tab and answer y.",
+        );
+      }
+      ui.gap();
+      ui.info(
+        `Claude Code on ${pc.bold(peer.name)} asks once before enabling Remote Control.`,
+      );
+      ui.info(
+        `Answer ${pc.bold("y")}, wait for the link, then press ${pc.bold("Ctrl+C")}.`,
+      );
+      ui.gap();
+      await removeRemote(peer, RC_LABEL);
+      const cd = rel ? `cd "$HOME"/${shq(rel)}` : `cd "$HOME"`;
+      await shTty(
+        peer,
+        `${cd} && claude remote-control --name ${shq(peer.name)}`,
+        {
+          unlock: true,
+        },
+      );
+      const again = spinner(`Starting Remote Control on ${peer.name}`);
+      log = await startRc(peer, rel, mode);
+      again.stop();
+      if (CONSENT.test(log)) {
+        throw new TwinError(
+          "needs_consent",
+          "Remote Control is still waiting for a yes.",
+          "Run `twin rc on` again and answer y.",
+        );
+      }
+    }
     emit({ ok: true, remoteControl: true, dir: rel || "~", log });
     ui.gap();
     ui.ok(`Remote Control is always on for ${pc.bold(peer.name)} in ~/${rel}`);

@@ -113,6 +113,11 @@ export async function runCommand(words: string[], flags: RunFlags) {
       : await fetchJob(peer, job);
   emit({ ok: done.status === "done", job: done, changed: fetched?.changed });
   if (fetched) printFetched(job, fetched.changed);
+  else if (done.status !== "done") {
+    ui.gap();
+    ui.fail(`${STATUS[done.status]} ${done.error ?? done.result ?? ""}`.trim());
+    ui.gap();
+  }
 }
 
 function printFetched(job: JobMeta, changed: string[]) {
@@ -242,6 +247,7 @@ export async function attachCommand(
   process.exitCode = await shTty(
     peer,
     `cd "$HOME"/${shq(fromHome(job.dir))} && exec claude --resume ${job.sessionId}`,
+    { unlock: true },
   );
 }
 

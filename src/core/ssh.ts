@@ -64,12 +64,19 @@ export async function shOk(
   return result.stdout;
 }
 
-export async function shTty(peer: Peer, script: string): Promise<number> {
+const UNLOCK =
+  'security show-keychain-info >/dev/null 2>&1 || { echo "Unlocking the keychain so Claude can read its sign-in."; security unlock-keychain "$HOME/Library/Keychains/login.keychain-db"; }';
+
+export async function shTty(
+  peer: Peer,
+  script: string,
+  { unlock = false } = {},
+): Promise<number> {
   return interactive("ssh", [
     ...sshOptions(peer.port),
     "-t",
     await target(peer),
-    wrap(script),
+    wrap(unlock ? `${UNLOCK}; ${script}` : script),
   ]);
 }
 

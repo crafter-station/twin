@@ -1,6 +1,7 @@
 import { existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import type { Peer } from "./config.ts";
+import { TwinError } from "./errors.ts";
 import { HOME } from "./paths.ts";
 import { run } from "./proc.ts";
 import { sh, shOk } from "./ssh.ts";
@@ -16,6 +17,7 @@ type Agent = {
   interval?: number;
   keepAlive?: boolean;
   env?: Record<string, string>;
+  processType?: "Background" | "Standard" | "Interactive";
 };
 
 const xml = (s: string) =>
@@ -48,7 +50,7 @@ ${env}
   <key>RunAtLoad</key>
   <true/>
 ${agent.interval ? `  <key>StartInterval</key>\n  <integer>${agent.interval}</integer>\n` : ""}${agent.keepAlive ? "  <key>KeepAlive</key>\n  <true/>\n  <key>ThrottleInterval</key>\n  <integer>30</integer>\n" : ""}  <key>ProcessType</key>
-  <string>Background</string>
+  <string>${agent.processType ?? "Background"}</string>
   <key>StandardOutPath</key>
   <string>${xml(agent.log)}</string>
   <key>StandardErrorPath</key>
@@ -97,4 +99,32 @@ export async function removeRemote(peer: Peer, label: string) {
     peer,
     `launchctl bootout gui/$(id -u)/${label} 2>/dev/null; rm -f "$HOME/Library/LaunchAgents/${label}.plist"; true`,
   );
+}
+
+export const GUI_HINT =
+  "Log in on the mini's screen once, and turn on automatic login in System Settings → Users & Groups so it survives reboots.";
+
+export async function runInSession(
+  peer: Peer,
+  agent: Agent,
+  plistPath: string,
+) {
+  await shOk(
+    peer,
+    `mkdir -p "$(dirname "${plistPath}")" && cat > "${plistPath}"`,
+    {
+      input: plist(agent),
+    },
+  );
+  const result = await sh(
+    peer,
+    `launchctl bootout gui/$(id -u)/${agent.label} 2>/dev/null; launchctl bootstrap gui/$(id -u) "${plistPath}"`,
+  );
+  if (result.code !== 0) {
+    throw new TwinError(
+      "no_session",
+      `${peer.name} has no desktop session to run Claude in.`,
+      GUI_HINT,
+    );
+  }
 }

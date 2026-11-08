@@ -46,6 +46,7 @@ export async function claudeCommand(
   process.exitCode = await shTty(
     peer,
     `${enter(rel)}; exec claude ${passthrough}`,
+    { unlock: true },
   );
   if (isProject) {
     ui.hint(`Bring the changes back with ${pc.bold("twin fetch --here")}`);
@@ -66,5 +67,7 @@ export async function loginCommand(flags: { on?: string; here?: boolean }) {
     `Signing in to Claude Code on ${pc.bold(peer.name)}. Open the link it prints on this Mac.`,
   );
   ui.gap();
-  process.exitCode = await shTty(peer, "claude auth login");
+  process.exitCode = await shTty(peer, "claude auth login", {
+    unlock: true,
+  });
 }

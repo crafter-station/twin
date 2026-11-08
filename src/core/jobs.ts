@@ -3,6 +3,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Peer } from "./config.ts";
 import { TwinError } from "./errors.ts";
+import { runInSession } from "./launchd.ts";
 import { mirror } from "./mirror.ts";
 import {
   CLAUDE_DIR,
@@ -10,6 +11,7 @@ import {
   HOME,
   isInsideHome,
   projectKey,
+  REMOTE_ENV,
   stamp,
 } from "./paths.ts";
 import { localName } from "./proc.ts";
@@ -167,11 +169,34 @@ export async function startJob(
     ...(job.model ? ["--model", shq(job.model)] : []),
   ].join(" ");
 
-  const base = `${JOBS}/${job.id}`;
-  await shOk(
+  const label = `run.crafter.twin.job.${job.id}`;
+  const remote = `${peer.home}/.twin/jobs/${job.id}`;
+  const script = [
+    REMOTE_ENV,
+    `B=${shq(remote)}`,
+    'echo $$ > "$B.pid"',
+    `cd "$HOME"/${shq(fromHome(job.dir))} || { echo "Project folder is missing" > "$B.err"; exit 1; }`,
+    "caffeinate -i -w $$ &",
+    `${claude} > "$B.jsonl" 2> "$B.err" < /dev/null`,
+    `launchctl bootout gui/$(id -u)/${label} 2>/dev/null`,
+  ].join("\n");
+
+  await shOk(peer, `mkdir -p ${JOBS} && cat > ${JOBS}/${job.id}.json`, {
+    input: JSON.stringify(job),
+  });
+  await runInSession(
     peer,
-    `mkdir -p ${JOBS} && cat > "${base}.json" && cd "$HOME"/${shq(fromHome(job.dir))} && { nohup caffeinate -i ${claude} > "${base}.jsonl" 2> "${base}.err" < /dev/null & echo $! > "${base}.pid"; }`,
-    { input: JSON.stringify(job) },
+    {
+      label,
+      args: ["/bin/sh", "-c", script],
+      log: `${remote}.launchd.log`,
+      processType: "Standard",
+    },
+    `${remote}.plist`,
+  );
+  await sh(
+    peer,
+    `for i in 1 2 3 4 5 6 7 8 9 10; do [ -s ${JOBS}/${job.id}.pid ] && break; sleep 0.3; done; true`,
   );
   updateState((state) => {
     state.lastJob = { peer: peer.name, id: job.id };
@@ -290,7 +315,7 @@ export async function stopJob(peer: Peer, job: JobMeta) {
   const base = `${JOBS}/${job.id}`;
   await sh(
     peer,
-    `p=$(cat "${base}.pid" 2>/dev/null); [ -n "$p" ] && { pkill -TERM -P "$p" 2>/dev/null; kill -TERM "$p" 2>/dev/null; }; touch "${base}.stopped"; true`,
+    `touch "${base}.stopped"; p=$(cat "${base}.pid" 2>/dev/null); [ -n "$p" ] && { pkill -TERM -P "$p" 2>/dev/null; kill -TERM "$p" 2>/dev/null; }; launchctl bootout gui/$(id -u)/run.crafter.twin.job.${job.id} 2>/dev/null; true`,
   );
 }
 
