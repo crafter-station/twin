@@ -8,6 +8,7 @@ import {
   jobsCommand,
   logsCommand,
   runCommand,
+  sendCommand,
   stopCommand,
 } from "./commands/jobs.ts";
 import { pair } from "./commands/pair.ts";
@@ -171,6 +172,18 @@ export function run() {
     .action(
       guard((job: string | undefined, _o: unknown, cmd: Command) =>
         logsCommand(job, globals(cmd)),
+      ),
+    );
+
+  program
+    .command("send [dir]")
+    .description(
+      "copy a project to the same path on the other Mac, without node_modules or build output",
+    )
+    .option("--force", "allow a folder that is not a git project")
+    .action(
+      guard((dir: string | undefined, _o: unknown, cmd: Command) =>
+        sendCommand(dir, globals(cmd)),
       ),
     );
 

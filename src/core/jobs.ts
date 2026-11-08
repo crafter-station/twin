@@ -11,8 +11,8 @@ import {
   HOME,
   isInsideHome,
   projectKey,
-  REMOTE_ENV,
   stamp,
+  TOOLCHAIN_ENV,
 } from "./paths.ts";
 import { localName } from "./proc.ts";
 import { transfer } from "./rsync.ts";
@@ -172,7 +172,7 @@ export async function startJob(
   const label = `run.crafter.twin.job.${job.id}`;
   const remote = `${peer.home}/.twin/jobs/${job.id}`;
   const script = [
-    REMOTE_ENV,
+    TOOLCHAIN_ENV,
     `B=${shq(remote)}`,
     'echo $$ > "$B.pid"',
     `cd "$HOME"/${shq(fromHome(job.dir))} || { echo "Project folder is missing" > "$B.err"; exit 1; }`,

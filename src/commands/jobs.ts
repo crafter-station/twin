@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import pc from "picocolors";
 import { getPeer, type Peer } from "../core/config.ts";
 import { TwinError } from "../core/errors.ts";
@@ -13,10 +15,17 @@ import {
   startJob,
   stopJob,
 } from "../core/jobs.ts";
-import { fromHome, isInsideHome } from "../core/paths.ts";
+import { mirror } from "../core/mirror.ts";
+import {
+  CLAUDE_DIR,
+  fromHome,
+  isInsideHome,
+  projectKey,
+  stamp,
+} from "../core/paths.ts";
 import { transfer } from "../core/rsync.ts";
 import { PROJECT_EXCLUDES } from "../core/scopes.ts";
-import { shq, shTty } from "../core/ssh.ts";
+import { sh, shq, shTty } from "../core/ssh.ts";
 import {
   ago,
   duration,
@@ -273,5 +282,50 @@ async function fetchHere(peer: Peer) {
       : "Already up to date",
   );
   for (const f of files.slice(0, 15)) ui.info(f);
+  ui.gap();
+}
+
+export async function sendCommand(
+  dirArg: string | undefined,
+  flags: { on?: string; force?: boolean },
+) {
+  const peer = getPeer(flags.on);
+  const dir = dirArg ? resolve(dirArg) : process.cwd();
+  if (!isInsideHome(dir)) {
+    throw new TwinError("bad_dir", `${dir} is outside your home folder.`);
+  }
+  if (!flags.force && !existsSync(join(dir, ".git"))) {
+    throw new TwinError(
+      "not_a_project",
+      `${fromHome(dir)} is not a git project.`,
+      "cd into a project, or add --force.",
+    );
+  }
+  const started = Date.now();
+  const spin = spinner(`Copying ${fromHome(dir)} to ${peer.name}`);
+  await sh(peer, `mkdir -p "$HOME"/${shq(fromHome(dir))}`);
+  const copied = await transfer(peer, {
+    from: "local",
+    path: fromHome(dir),
+    dir: true,
+    excludes: PROJECT_EXCLUDES,
+  });
+  spin.update(`Copying its sessions and memory to ${peer.name}`);
+  await mirror(
+    peer,
+    [{ path: fromHome(join(CLAUDE_DIR, "projects", projectKey(dir))) }],
+    { push: true, pull: false, dryRun: false, tag: stamp() },
+  );
+  spin.stop();
+  const files = copied.filter((f) => !f.startsWith(".git/"));
+  emit({ ok: true, dir, copied: files.length, ms: Date.now() - started });
+  ui.gap();
+  ui.ok(
+    `${plural(files.length, "file")} copied to ${pc.bold(peer.name)} in ${duration(Date.now() - started)}`,
+  );
+  ui.hint(
+    `Work there: ${pc.bold("twin claude")} or pick ${pc.bold(peer.name)} in the Claude app`,
+  );
+  ui.hint(`Bring changes back: ${pc.bold("twin fetch --here")}`);
   ui.gap();
 }

@@ -20,6 +20,8 @@ export const PATHS = {
 export const REMOTE_ENV =
   'export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"';
 
+export const TOOLCHAIN_ENV = `${REMOTE_ENV}; export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" >/dev/null 2>&1; true`;
+
 export const projectKey = (dir: string) => dir.replace(/[^a-zA-Z0-9]/g, "-");
 
 export const fromHome = (path: string) => relative(HOME, path);

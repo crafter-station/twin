@@ -85,11 +85,18 @@ export async function isLoadedLocal(label: string) {
   );
 }
 
+const restart = (label: string, path: string) =>
+  [
+    `d=gui/$(id -u); launchctl bootout "$d/${label}" 2>/dev/null`,
+    `i=0; while launchctl print "$d/${label}" >/dev/null 2>&1 && [ $i -lt 40 ]; do sleep 0.25; i=$((i+1)); done`,
+    `launchctl bootstrap "$d" "${path}" 2>/dev/null || { sleep 2; launchctl bootstrap "$d" "${path}"; }`,
+  ].join("; ");
+
 export async function installRemote(peer: Peer, agent: Agent) {
   const path = `$HOME/Library/LaunchAgents/${agent.label}.plist`;
   await shOk(
     peer,
-    `mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.twin" && launchctl bootout gui/$(id -u)/${agent.label} 2>/dev/null; cat > "${path}" && launchctl bootstrap gui/$(id -u) "${path}"`,
+    `mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.twin" && cat > "${path}" && ${restart(agent.label, path)}`,
     { input: plist(agent) },
   );
 }
@@ -116,10 +123,7 @@ export async function runInSession(
       input: plist(agent),
     },
   );
-  const result = await sh(
-    peer,
-    `launchctl bootout gui/$(id -u)/${agent.label} 2>/dev/null; launchctl bootstrap gui/$(id -u) "${plistPath}"`,
-  );
+  const result = await sh(peer, restart(agent.label, plistPath));
   if (result.code !== 0) {
     throw new TwinError(
       "no_session",

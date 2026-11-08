@@ -25,6 +25,8 @@ twin logs -f                      # watch the last job live
 twin fetch                        # bring its changes and its session back
 claude --resume <session>         # keep going on the laptop
 twin claude                       # open Claude Code on the mini, in this same folder
+twin send                         # copy this project to the same path on the mini
+twin fetch --here                 # bring this project's changes back
 ```
 
 `twin run` copies the project (never `node_modules` or build output) and its memory to the same path on the mini, then starts headless Claude Code there under `caffeinate`. Close the lid; it keeps working.

@@ -18,7 +18,7 @@ import {
   fromHome,
   isInsideHome,
   PATHS,
-  REMOTE_ENV,
+  TOOLCHAIN_ENV,
 } from "../core/paths.ts";
 import { probeRemote } from "../core/probe.ts";
 import { selfCommand, skillText } from "../core/self.ts";
@@ -109,7 +109,7 @@ export async function enableRc(peer: Peer, rel: string, mode: string) {
     args: [
       "/bin/sh",
       "-c",
-      `${REMOTE_ENV}; ${cd} && exec claude remote-control --name ${shq(peer.name)} --permission-mode ${shq(mode)}`,
+      `${TOOLCHAIN_ENV}; ${cd} && exec claude remote-control --name ${shq(peer.name)} --permission-mode ${shq(mode)}`,
     ],
     keepAlive: true,
     log: `${peer.home}/.twin/rc.log`,
