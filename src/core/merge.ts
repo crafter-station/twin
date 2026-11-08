@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Peer } from "./config.ts";
+import { pathMap, toLocalText, toRemoteText } from "./pathmap.ts";
 import { CLAUDE_DIR, CLAUDE_JSON } from "./paths.ts";
 import { sh, shOk } from "./ssh.ts";
 import { readJson, writeJson, writeText } from "./store.ts";
@@ -25,8 +26,12 @@ export async function mergeHistory(
   const local = existsSync(HISTORY)
     ? toLines(readFileSync(HISTORY, "utf8"))
     : [];
+  const m = pathMap(peer);
   const remote = toLines(
-    (await sh(peer, 'cat "$HOME/.claude/history.jsonl" 2>/dev/null')).stdout,
+    toLocalText(
+      m,
+      (await sh(peer, 'cat "$HOME/.claude/history.jsonl" 2>/dev/null')).stdout,
+    ),
   );
   const localSet = new Set(local);
   const remoteSet = new Set(remote);
@@ -43,7 +48,7 @@ export async function mergeHistory(
       await shOk(
         peer,
         'mkdir -p "$HOME/.claude" && cat > "$HOME/.claude/history.jsonl.twin" && mv "$HOME/.claude/history.jsonl.twin" "$HOME/.claude/history.jsonl"',
-        { input: merged },
+        { input: toRemoteText(m, merged) },
       );
     }
   }
@@ -84,7 +89,10 @@ export async function mergeMcp(
   const local = readJson<ClaudeJson>(CLAUDE_JSON, {});
   const remote = await readRemoteClaudeJson(peer);
   const mine = local.mcpServers ?? {};
-  const theirs = remote.mcpServers ?? {};
+  const m = pathMap(peer);
+  const theirs = JSON.parse(
+    toLocalText(m, JSON.stringify(remote.mcpServers ?? {})),
+  ) as Record<string, unknown>;
   const remoteWins = direction === "pull";
 
   const up =
@@ -111,7 +119,10 @@ export async function mergeMcp(
         mcpServers: merged,
       });
     if (up.length > 0)
-      await writeRemoteClaudeJson(peer, { ...remote, mcpServers: merged });
+      await writeRemoteClaudeJson(peer, {
+        ...remote,
+        mcpServers: JSON.parse(toRemoteText(m, JSON.stringify(merged))),
+      });
   }
   return { up: up.length, down: down.length, items: [...up, ...down] };
 }

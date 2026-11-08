@@ -165,10 +165,10 @@ export async function pair(
     `${pc.bold(name)} → ${info.hostname} · macOS ${info.os} · ${info.arch}`,
   );
   ui.ok(`Signed in with your SSH key over ${routeKind(address ?? "")}`);
-  ui[info.home === HOME ? "ok" : "warn"](
+  ui.ok(
     info.home === HOME
       ? `Same home folder (${HOME})`
-      : `Home folder differs: ${info.home}`,
+      : `Paths translated ${HOME} ↔ ${info.home}`,
   );
   ui[info.claude ? "ok" : "info"](
     info.claude

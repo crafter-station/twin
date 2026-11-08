@@ -156,10 +156,8 @@ async function peerChecks(peer: Peer): Promise<Check[]> {
       : {
           id: "paths",
           scope,
-          level: "error",
-          title: `Home folder differs (${info.home})`,
-          detail:
-            "Sessions are filed by full path, so they only resume when both Macs use the same username.",
+          level: "ok",
+          title: `Paths translated ${HOME} ↔ ${info.home}`,
         },
   );
 

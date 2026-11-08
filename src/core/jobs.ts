@@ -3,12 +3,14 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Peer } from "./config.ts";
 import { TwinError } from "./errors.ts";
+import { mirror } from "./mirror.ts";
 import {
   CLAUDE_DIR,
   fromHome,
   HOME,
   isInsideHome,
   projectKey,
+  stamp,
 } from "./paths.ts";
 import { localName } from "./proc.ts";
 import { transfer } from "./rsync.ts";
@@ -124,11 +126,11 @@ export async function startJob(
       "memory",
     );
     if (existsSync(memory)) {
-      await sh(peer, `mkdir -p "$HOME"/${shq(fromHome(memory))}`);
-      await transfer(peer, {
-        from: "local",
-        path: fromHome(memory),
-        dir: true,
+      await mirror(peer, [{ path: fromHome(memory) }], {
+        push: true,
+        pull: false,
+        dryRun: false,
+        tag: stamp(),
       });
     }
   }
@@ -299,11 +301,18 @@ export async function fetchJob(peer: Peer, job: JobMeta) {
     dir: true,
     excludes: PROJECT_EXCLUDES,
   });
-  const sessions = join(CLAUDE_DIR, "projects", projectKey(job.dir));
-  await transfer(peer, { from: "remote", path: fromHome(sessions), dir: true });
+  await pullSessions(peer, job.dir);
   return {
     changed: changed.filter((f) => !f.startsWith(".git/")),
     dir: job.dir,
     home: HOME,
   };
+}
+
+export function pullSessions(peer: Peer, dir: string) {
+  return mirror(
+    peer,
+    [{ path: fromHome(join(CLAUDE_DIR, "projects", projectKey(dir))) }],
+    { push: false, pull: true, dryRun: false, tag: stamp() },
+  );
 }

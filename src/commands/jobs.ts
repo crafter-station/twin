@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import pc from "picocolors";
 import { getPeer, type Peer } from "../core/config.ts";
 import { TwinError } from "../core/errors.ts";
@@ -10,15 +9,11 @@ import {
   type JobMeta,
   listJobs,
   type Mode,
+  pullSessions,
   startJob,
   stopJob,
 } from "../core/jobs.ts";
-import {
-  CLAUDE_DIR,
-  fromHome,
-  isInsideHome,
-  projectKey,
-} from "../core/paths.ts";
+import { fromHome, isInsideHome } from "../core/paths.ts";
 import { transfer } from "../core/rsync.ts";
 import { PROJECT_EXCLUDES } from "../core/scopes.ts";
 import { shq, shTty } from "../core/ssh.ts";
@@ -261,11 +256,7 @@ async function fetchHere(peer: Peer) {
     dir: true,
     excludes: PROJECT_EXCLUDES,
   });
-  await transfer(peer, {
-    from: "remote",
-    path: fromHome(join(CLAUDE_DIR, "projects", projectKey(dir))),
-    dir: true,
-  });
+  await pullSessions(peer, dir);
   spin.stop();
   const files = changed.filter((f) => !f.startsWith(".git/"));
   emit({ ok: true, dir, changed: files });

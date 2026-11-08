@@ -1,6 +1,11 @@
 export type ScopeName = "config" | "sessions" | "history" | "mcp";
 
-export type FileItem = { path: string; dir: boolean; excludes?: string[] };
+export type FileItem = {
+  path: string;
+  dir: boolean;
+  translate?: boolean;
+  excludes?: string[];
+};
 
 export const SCOPE_NAMES: ScopeName[] = [
   "config",
@@ -31,7 +36,7 @@ export const FILE_SCOPES: Partial<Record<ScopeName, FileItem[]>> = {
   ],
   sessions: [
     { path: ".claude/projects", dir: true },
-    { path: ".claude/file-history", dir: true },
+    { path: ".claude/file-history", dir: true, translate: false },
     { path: ".claude/todos", dir: true },
     { path: ".claude/plans", dir: true },
   ],
