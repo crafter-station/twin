@@ -102,7 +102,7 @@ export async function removeRemote(peer: Peer, label: string) {
 }
 
 export const GUI_HINT =
-  "Log in on the mini's screen once, and turn on automatic login in System Settings → Users & Groups so it survives reboots.";
+  "It needs someone logged in on its screen. After a restart, unlock FileVault and log in once (on the screen, or over SSH then Screen Sharing). For planned restarts use `sudo fdesetup authrestart`.";
 
 export async function runInSession(
   peer: Peer,
