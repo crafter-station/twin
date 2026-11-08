@@ -104,4 +104,4 @@ export const plural = (n: number, word: string) =>
   `${n} ${n === 1 ? word : `${word}s`}`;
 
 export const money = (usd?: number) =>
-  usd === undefined ? "" : `$${usd.toFixed(2)}`;
+  usd === undefined ? "" : `≈$${usd.toFixed(2)} API est.`;

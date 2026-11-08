@@ -24,6 +24,7 @@ twin fetch <id> --json                                               # copies ch
 - Write the task as a complete brief. The job cannot ask questions.
 - After `fetch`, tell the user which files changed. They can continue the same conversation locally with `claude --resume <sessionId>`.
 - Good fits: long builds, Blender or video renders, big test suites, dependency upgrades across a repo, scraping or ETL runs, anything that would tie up the laptop.
+- Jobs use the Claude subscription the mini is signed in with. `costUsd` in results is Claude Code's API-price estimate, not a charge.
 - Never use it for tasks that spend real money, send messages or deploy, unless the user explicitly asked.
 
 ## Sync
