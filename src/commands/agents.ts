@@ -23,7 +23,7 @@ import {
 import { probeRemote } from "../core/probe.ts";
 import { selfCommand, skillText } from "../core/self.ts";
 import { sh, shq, shTty } from "../core/ssh.ts";
-import { emit, spinner, ui } from "../ui/out.ts";
+import { emit, plain, spinner, ui } from "../ui/out.ts";
 
 const SKILL_TARGET = join(CLAUDE_DIR, "skills", "twin", "SKILL.md");
 
@@ -195,8 +195,9 @@ export async function rcCommand(
   if (action === "logs") {
     const log = (await sh(peer, 'tail -n 60 "$HOME/.twin/rc.log" 2>/dev/null'))
       .stdout;
-    emit({ ok: true, log });
-    ui.say(log);
+    const clean = plain(log);
+    emit({ ok: true, log: clean });
+    ui.say(clean);
     return;
   }
   const info = await probeRemote(peer);

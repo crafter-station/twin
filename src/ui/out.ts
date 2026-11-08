@@ -11,6 +11,11 @@ export const isQuiet = () => mode.quiet || mode.json;
 const ESC = String.fromCharCode(27);
 const ANSI = new RegExp(`${ESC}\\[[0-9;]*m`, "g");
 const CLEAR = `\r${ESC}[2K`;
+const BEL = String.fromCharCode(7);
+const OSC = new RegExp(`${ESC}\\][^${BEL}${ESC}]*(?:${BEL}|${ESC}\\\\)`, "g");
+const CSI = new RegExp(`${ESC}(?:\\[[0-9;?]*[A-Za-z]|[78])`, "g");
+
+export const plain = (s: string) => s.replace(OSC, "").replace(CSI, "");
 
 export const visible = (s: string) => s.replace(ANSI, "").length;
 export const pad = (s: string, width: number) =>
