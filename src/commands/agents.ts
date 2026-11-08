@@ -1,8 +1,8 @@
-import { copyFileSync, existsSync, mkdirSync, realpathSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import pc from "picocolors";
 import { getPeer, type Peer } from "../core/config.ts";
+import { TwinError } from "../core/errors.ts";
 import {
   installLocal,
   installRemote,
@@ -21,21 +21,23 @@ import {
   REMOTE_ENV,
 } from "../core/paths.ts";
 import { probeRemote } from "../core/probe.ts";
+import { selfCommand, skillText } from "../core/self.ts";
 import { sh, shq } from "../core/ssh.ts";
 import { emit, spinner, ui } from "../ui/out.ts";
 
-const SKILL_SOURCE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "skill",
-  "SKILL.md",
-);
 const SKILL_TARGET = join(CLAUDE_DIR, "skills", "twin", "SKILL.md");
 
 export function installSkill() {
+  const text = skillText();
+  if (!text) {
+    throw new TwinError(
+      "no_skill",
+      "The twin skill file is missing from this install.",
+      "Reinstall twin.",
+    );
+  }
   mkdirSync(dirname(SKILL_TARGET), { recursive: true });
-  copyFileSync(SKILL_SOURCE, SKILL_TARGET);
+  writeFileSync(SKILL_TARGET, text);
   return SKILL_TARGET;
 }
 
@@ -51,13 +53,7 @@ export function skillCommand() {
 export async function enableAuto(minutes: number) {
   await installLocal({
     label: SYNC_LABEL,
-    args: [
-      process.execPath,
-      realpathSync(process.argv[1] ?? ""),
-      "sync",
-      "--quiet",
-      "--if-reachable",
-    ],
+    args: [...selfCommand(), "sync", "--quiet", "--if-reachable"],
     interval: minutes * 60,
     log: join(PATHS.logs, "auto.log"),
     env: { PATH: process.env.PATH ?? "/usr/bin:/bin" },
@@ -168,5 +164,3 @@ export async function rcCommand(
   );
   ui.gap();
 }
-
-export const skillAvailable = () => existsSync(SKILL_SOURCE);

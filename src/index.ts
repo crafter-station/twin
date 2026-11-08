@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import pc from "picocolors";
 import { autoCommand, rcCommand, skillCommand } from "./commands/agents.ts";
+import { installCommand } from "./commands/install.ts";
 import {
   attachCommand,
   fetchCommand,
@@ -251,6 +252,11 @@ export function run() {
         rcCommand(action, globals(cmd)),
       ),
     );
+
+  program
+    .command("install")
+    .description("install twin itself on the other Mac as a standalone binary")
+    .action(guard((_o: unknown, cmd: Command) => installCommand(globals(cmd))));
 
   program
     .command("skill")

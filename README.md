@@ -49,6 +49,7 @@ twin rc on        # always-on Remote Control, restarts after crashes and reboots
 twin login        # sign in to Claude Code on the mini
 twin doctor --fix # checks paths, versions, sign-in, sleep, retention, and fixes what it can
 twin auto on      # background sync every 5 minutes while the mini is reachable
+twin install      # put twin itself on the mini as one standalone binary, no Node needed
 ```
 
 Routes are picked per command: USB-C or Thunderbolt link first, then LAN, then Tailscale, then Bonjour names. `twin status` shows which one it used.
@@ -57,10 +58,13 @@ Routes are picked per command: USB-C or Thunderbolt link first, then LAN, then T
 
 Add `--json` to any command. Success is `{"ok": true, ...}`, failure is `{"ok": false, "error": {"code", "message", "hint"}}`, and exit code 2 means the other Mac is away. `twin skill` installs a Claude Code skill so every session knows when to delegate.
 
+## Different usernames
+
+The Macs do not need the same account. When the home folders differ (`/Users/cris` and `/Users/cris-mini`), twin translates on every copy: session folder names, and full paths inside text files such as transcripts, memory, history, settings and MCP configs. It matches whole usernames only, leaves binary files and file checkpoints byte for byte, and keeps timestamps so newer-wins stays exact.
+
 ## Rules that keep it safe
 
 - Never deletes on the other side. Files that get replaced are backed up to `~/.twin/backups`.
-- Both Macs should use the same username so sessions resume. `twin doctor` checks it.
 - Do not open the same session on both Macs at once. Separate sessions are fine.
 
 MIT
