@@ -9,6 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/crafter-station/twin.git"
   },
+  "homepage": "https://twin.crafter.run",
+  "bugs": {
+    "url": "https://github.com/crafter-station/twin/issues"
+  },
   "keywords": [
     "claude",
     "claude-code",

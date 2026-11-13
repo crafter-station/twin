@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>twin · Every Mac, the same Claude Code</title>
+<meta name="description" content="twin is a free, open source CLI that syncs Claude Code sessions, memory, skills and settings between your Macs and hands long work to a Mac mini. Plain SSH and rsync, no cloud in the middle.">
+<meta name="author" content="Cristian Correa">
+<link rel="author" href="https://cris.fast">
+<link rel="canonical" href="https://twin.crafter.run">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="twin">
+<meta property="og:title" content="twin · Every Mac, the same Claude Code">
+<meta property="og:description" content="Sync Claude Code between your Macs and hand long work to a Mac mini.">
+<meta property="og:url" content="https://twin.crafter.run">
+<meta property="og:image" content="https://twin.crafter.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="twin: every Mac, the same Claude Code.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://twin.crafter.run/og.png">
+<meta name="theme-color" content="#EC752C">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "twin",
+  "description": "A CLI that syncs Claude Code sessions, memory, skills and settings between Macs and delegates work to a Mac mini.",
+  "url": "https://twin.crafter.run",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS",
+  "softwareVersion": "0.1.0",
+  "license": "https://opensource.org/licenses/MIT",
+  "downloadUrl": "https://www.npmjs.com/package/@crafter/twin",
+  "codeRepository": "https://github.com/crafter-station/twin",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Cristian Correa", "url": "https://cris.fast" },
+  "publisher": { "@type": "Organization", "name": "Crafter Station", "url": "https://crafter.run" }
+}
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --orange: #EC752C;
+    --ink: #1B1B1B;
+    --ink-raised: #262626;
+    --ink-line: #353535;
+    --paper: #F2F2F0;
+    --paper-line: #DCDCD8;
+    --brick: #E3E3E0;
+    --yellow: #FAE34C;
+    --lilac: #C9A4F7;
+    --green: #45C283;
+    --blue: #3F5BD9;
+    --bullet: #F07A2E;
+    --on-ink: #F5F5F2;
+    --on-ink-muted: #A9A9A4;
+    --on-paper-muted: #6F6F6A;
+    --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --wall: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='56'%3E%3Cg fill='none' stroke='%232E2E2E' stroke-width='1.5'%3E%3Crect x='2' y='2' width='84' height='24' rx='2'/%3E%3Crect x='-42' y='30' width='84' height='24' rx='2'/%3E%3Crect x='46' y='30' width='84' height='24' rx='2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--orange); color: var(--ink); }
+  body { font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; padding: 0 16px 16px; overflow-x: hidden; }
+  a { color: inherit; }
+  button { font: inherit; }
+  h1, h2, h3, p, ul { margin: 0; padding: 0; }
+  ul { list-style: none; }
+  :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 16px; }
+  .label { display: flex; align-items: center; gap: 10px; font: 500 12.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+  .label::before { content: ""; flex: none; width: 9px; height: 9px; background: var(--bullet); }
+  .mark { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 21px; letter-spacing: -0.04em; text-decoration: none; }
+  .mark svg { width: 26px; height: 20px; }
+
+  nav { max-width: 1120px; margin: 0 auto; padding-block: 22px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .links { display: flex; gap: 6px; }
+  .links a { font: 500 12.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; padding: 11px 14px; }
+  .links a:hover { background: rgba(27, 27, 27, .1); }
+  .links a.solid { background: var(--ink); color: var(--on-ink); }
+  .links a.solid:hover { background: #000; }
+
+  .dark { background-color: var(--ink); color: var(--on-ink); }
+  .light { background: var(--paper); }
+
+  .hero { position: relative; overflow: hidden; min-height: 660px; background-image: radial-gradient(ellipse 70% 90% at 12% 22%, var(--ink) 30%, transparent 78%), var(--wall); }
+  .wave { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--yellow); stroke-linecap: butt; }
+  .wave path.hot { stroke: var(--lilac); }
+  .copy { position: relative; max-width: 500px; min-height: inherit; padding: 56px 0 44px 56px; display: flex; flex-direction: column; gap: 22px; }
+  h1 { font-weight: 600; font-size: clamp(42px, 5.4vw, 62px); line-height: .98; letter-spacing: -0.048em; text-wrap: balance; }
+  .lede { color: var(--on-ink-muted); font-size: 18px; line-height: 1.5; max-width: 34ch; text-wrap: pretty; }
+  .install { align-self: flex-start; display: flex; align-items: stretch; margin-top: 6px; background: var(--ink-raised); border: 1px solid var(--ink-line); }
+  .install code { font: 500 15px/1 var(--mono); padding: 16px 18px; white-space: nowrap; }
+  .install code::before { content: "$ "; color: var(--lilac); }
+  .install button { border: 0; cursor: pointer; padding-inline: 16px; background: var(--yellow); color: var(--ink); font: 500 12.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; min-width: 86px; }
+  .install button:hover { background: #FFEE7A; }
+  .meta { margin-top: auto; font: 500 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #7B7B76; }
+
+  .poster { padding: 40px 0 46px; text-align: center; overflow: hidden; }
+  .poster .mark { margin-bottom: 8px; }
+  .poster svg.flow { display: block; width: 100%; height: auto; }
+  .flow text { font: 500 13px var(--mono); letter-spacing: .12em; fill: var(--ink); }
+  .poster h2 { margin-top: 10px; font: 500 15px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+  .poster p { margin: 8px auto 0; padding-inline: 24px; color: var(--on-paper-muted); font-size: 17px; max-width: 46ch; text-wrap: balance; }
+
+  .pair { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+  .panel { padding: 36px; display: grid; gap: 26px; align-content: start; }
+  .dark.panel { background-image: var(--wall); }
+  .panel h2 { font-size: 28px; line-height: 1.05; font-weight: 600; letter-spacing: -0.04em; text-wrap: balance; }
+  .cmds { display: grid; gap: 1px; background: var(--ink-line); border: 1px solid var(--ink-line); }
+  .cmds li { display: grid; grid-template-columns: minmax(0, 15.5em) minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 13px 16px; background: var(--ink); font-size: 14.5px; }
+  .cmds code { font: 500 14px var(--mono); color: var(--yellow); white-space: nowrap; }
+  .cmds code::before { content: "$ "; color: var(--lilac); }
+  .cmds span { color: var(--on-ink-muted); }
+  .scopes { display: grid; border-top: 1px solid var(--paper-line); }
+  .scopes li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 16px; align-items: baseline; padding-block: 14px; border-bottom: 1px solid var(--paper-line); font-size: 15px; }
+  .scopes b { font: 500 12.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+  .scopes span { color: var(--on-paper-muted); }
+  .note { color: var(--on-paper-muted); font-size: 14.5px; }
+  .note b { color: var(--ink); font-weight: 500; }
+
+  .features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .feature { display: grid; grid-template-rows: auto 1fr; }
+  .feature svg { display: block; width: 100%; height: auto; }
+  .feature div { padding: 20px 22px 26px; display: grid; gap: 8px; align-content: start; }
+  .feature h3 { font-size: 19px; font-weight: 600; letter-spacing: -0.03em; }
+  .feature p { color: var(--on-paper-muted); font-size: 15px; line-height: 1.5; text-wrap: pretty; }
+  .feature code { font: 500 13px var(--mono); color: var(--ink); }
+
+  footer { padding: 22px 28px; display: flex; justify-content: space-between; align-items: center; gap: 10px 24px; flex-wrap: wrap; font-size: 14px; color: var(--on-ink-muted); }
+  footer a { color: var(--on-ink); text-decoration: none; }
+  footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .heart { width: 15px; height: 15px; vertical-align: -2px; fill: var(--yellow); }
+
+  @media (max-width: 1039px) {
+    .hero { min-height: 0; display: flex; flex-direction: column; background-image: var(--wall); }
+    .wave { position: relative; inset: auto; order: 2; height: clamp(250px, 42vw, 380px); }
+    .copy { max-width: none; min-height: 0; padding: 40px 28px 8px; }
+    .meta { margin-top: 4px; }
+    .pair { grid-template-columns: 1fr; }
+    .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .links a:not(.solid) { display: none; }
+    .copy { padding: 32px 22px 4px; }
+    .install code { font-size: 13.5px; padding-inline: 14px; }
+    .poster svg.flow { height: 300px; }
+    .panel { padding: 26px 22px; }
+    .cmds li, .scopes li { grid-template-columns: 1fr; gap: 4px; }
+    .features { grid-template-columns: 1fr; }
+    footer { padding: 20px 22px; }
+  }
+</style>
+</head>
+<body>
+<nav aria-label="Main">
+  <a class="mark" href="/" aria-label="twin home"><svg viewBox="0 0 26 20" fill="currentColor" aria-hidden="true"><rect width="17" height="8" rx="1.5"/><rect x="9" y="12" width="17" height="8" rx="1.5"/></svg>twin</a>
+  <div class="links">
+    <a href="https://github.com/crafter-station/twin">GitHub</a>
+    <a class="solid" href="https://www.npmjs.com/package/@crafter/twin">npm</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero dark" aria-label="twin">
+    <svg class="wave" id="wave" aria-hidden="true"></svg>
+    <div class="copy">
+      <p class="label">For Claude Code · Open source</p>
+      <h1>Every Mac, the same Claude Code.</h1>
+      <p class="lede">Sync sessions, memory, skills and settings between your Macs, and hand long work to a Mac mini. Plain SSH and rsync, no cloud in the middle.</p>
+      <div class="install"><code id="command">npm i -g @crafter/twin</code><button type="button" id="copy">Copy</button></div>
+      <p class="meta">v0.1.0 · macOS · MIT</p>
+    </div>
+  </section>
+
+  <section class="poster light" aria-labelledby="sync-title">
+    <span class="mark"><svg viewBox="0 0 26 20" fill="currentColor" aria-hidden="true"><rect width="17" height="8" rx="1.5"/><rect x="9" y="12" width="17" height="8" rx="1.5"/></svg>twin</span>
+    <svg class="flow" id="flow" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A box holding sessions, memory, skills and settings, travelling between a MacBook and a Mac mini"></svg>
+    <h2 id="sync-title">Two-way sync</h2>
+    <p>Newer file wins. Nothing is ever deleted on the other side.</p>
+  </section>
+
+  <div class="pair">
+    <section class="panel dark" aria-labelledby="daily-title">
+      <p class="label">Every day</p>
+      <h2 id="daily-title">Start it on the laptop. Finish it on the mini.</h2>
+      <ul class="cmds">
+        <li><code>twin pair</code><span>Finds the other Mac and trusts it once.</span></li>
+        <li><code>twin setup</code><span>Makes it match this Mac and turns on auto sync.</span></li>
+        <li><code>twin sync</code><span>Two-way, with backups kept for 14 days.</span></li>
+        <li><code>twin run "fix the tests"</code><span>Runs headless Claude Code on the mini.</span></li>
+        <li><code>twin logs -f</code><span>Watches the job live.</span></li>
+        <li><code>twin fetch</code><span>Brings its changes and its session back.</span></li>
+      </ul>
+    </section>
+
+    <section class="panel light" aria-labelledby="scopes-title">
+      <p class="label">What syncs</p>
+      <h2 id="scopes-title">Everything that makes it yours.</h2>
+      <ul class="scopes">
+        <li><b>Config</b><span>Settings, CLAUDE.md, skills, commands, agents, hooks and output styles.</span></li>
+        <li><b>Sessions</b><span>Transcripts, auto memory, checkpoints, todos and plans.</span></li>
+        <li><b>History</b><span>Prompt history for ↑ and ctrl+r, merged line by line.</span></li>
+        <li><b>MCP</b><span>Your MCP servers, and nothing else in that file.</span></li>
+      </ul>
+      <p class="note"><b>Never synced:</b> credentials. Each Mac signs in on its own.</p>
+    </section>
+  </div>
+
+  <section class="features" aria-label="Features">
+    <article class="feature light"><svg data-strip="yellow" viewBox="0 0 280 74" aria-hidden="true"></svg>
+      <div><h3>Cable first</h3><p>Uses the USB-C or Thunderbolt link when it is plugged in, then LAN, then Tailscale.</p></div></article>
+    <article class="feature light"><svg data-strip="lilac" viewBox="0 0 280 74" aria-hidden="true"></svg>
+      <div><h3>Close the lid</h3><p>The mini keeps working under caffeinate. Pick the session up later with <code>claude --resume</code>.</p></div></article>
+    <article class="feature light"><svg data-strip="green" viewBox="0 0 280 74" aria-hidden="true"></svg>
+      <div><h3>Different usernames</h3><p>Home folders do not need to match. twin translates paths on every copy.</p></div></article>
+    <article class="feature light"><svg data-strip="blue" viewBox="0 0 280 74" aria-hidden="true"></svg>
+      <div><h3>Built for agents</h3><p>Every command speaks <code>--json</code>, and <code>twin skill</code> teaches Claude when to delegate.</p></div></article>
+  </section>
+
+  <footer class="dark">
+    <span>Made with <svg class="heart" viewBox="0 0 24 24" role="img" aria-label="love"><path d="M12 21s-7.5-4.6-9.8-9.1C.6 8.6 2.4 4.5 6.3 4.5c2.3 0 3.9 1.3 5.7 3.4 1.8-2.1 3.4-3.4 5.7-3.4 3.9 0 5.7 4.1 4.1 7.4C19.5 16.4 12 21 12 21z"/></svg> from Latam by <a href="https://crafter.run">Crafter Station</a> · Built by <a rel="author" href="https://cris.fast">Cristian Correa</a></span>
+    <span><a href="https://github.com/crafter-station/twin">GitHub</a> · <a href="https://www.npmjs.com/package/@crafter/twin">npm</a> · MIT License</span>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const C = { ink: "#1B1B1B", brick: "#E3E3E0", yellow: "#FAE34C", lilac: "#C9A4F7", green: "#45C283", blue: "#3F5BD9", bullet: "#F07A2E", device: "#FAFAF8", deviceLine: "#CFCFCA", shade: "#CFCFCA" };
+  const seeded = seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const fmt = p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+
+  function spline(points, step = 6) {
+    const out = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(i - 1, 0)], p1 = points[i], p2 = points[i + 1], p3 = points[Math.min(i + 2, points.length - 1)];
+      const n = Math.max(2, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / step));
+      for (let j = 0; j < n; j++) {
+        const t = j / n, t2 = t * t, t3 = t2 * t;
+        out.push([0, 1].map(k => 0.5 * (2 * p1[k] + (p2[k] - p0[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 + (3 * p1[k] - p0[k] - 3 * p2[k] + p3[k]) * t3)));
+      }
+    }
+    out.push(points[points.length - 1]);
+    return out;
+  }
+
+  function offset(line, distance) {
+    return line.map((p, i) => {
+      const a = line[Math.max(i - 1, 0)], b = line[Math.min(i + 1, line.length - 1)];
+      const tx = b[0] - a[0], ty = b[1] - a[1], length = Math.hypot(tx, ty) || 1;
+      return [p[0] - ty / length * distance, p[1] + tx / length * distance];
+    });
+  }
+
+  function bricks(line, random, { min, max, gap }) {
+    const run = [0];
+    for (let i = 1; i < line.length; i++) run.push(run[i - 1] + Math.hypot(line[i][0] - line[i - 1][0], line[i][1] - line[i - 1][1]));
+    const total = run[run.length - 1];
+    const at = s => {
+      let i = 1;
+      while (i < run.length - 1 && run[i] < s) i++;
+      const t = (s - run[i - 1]) / (run[i] - run[i - 1] || 1);
+      return [line[i - 1][0] + (line[i][0] - line[i - 1][0]) * t, line[i - 1][1] + (line[i][1] - line[i - 1][1]) * t];
+    };
+    const out = [];
+    for (let s = -random() * max; s < total;) {
+      const length = min + random() * (max - min), from = Math.max(s, 0), to = Math.min(s + length, total);
+      if (to - from > 8) {
+        const points = [at(from), ...line.filter((_, i) => run[i] > from && run[i] < to), at(to)];
+        out.push({ d: "M" + points.map(fmt).join("L"), u: (from + to) / 2 / total, mid: at((from + to) / 2) });
+      }
+      s += length + gap;
+    }
+    return out;
+  }
+
+  function lanes(base, { count, pitch, seed, cut }) {
+    const random = seeded(seed);
+    return Array.from({ length: count }, (_, lane) =>
+      bricks(offset(base, (lane - (count - 1) / 2) * pitch), random, cut).map(b => ({ ...b, lane }))).flat();
+  }
+
+  const wave = document.getElementById("wave");
+  const wide = matchMedia("(min-width: 1040px)");
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const SHAPES = {
+    arch: { points: [[0.46, 1.25], [0.605, 0.7], [0.8, 0.36], [0.99, 0.33], [1.22, 0.46]], count: 20, pitch: 15, cut: { min: 36, max: 150, gap: 5 } },
+    hill: { points: [[-0.1, 1.15], [0.22, 0.62], [0.58, 0.27], [0.84, 0.4], [1.12, 0.72]], count: 14, pitch: 11, cut: { min: 26, max: 110, gap: 4 } },
+  };
+  let field = [];
+
+  function drawWave() {
+    const { width, height } = wave.getBoundingClientRect();
+    if (!width || !height) return;
+    const shape = wide.matches ? SHAPES.arch : SHAPES.hill;
+    const base = spline(shape.points.map(([x, y]) => [x * width, y * height]));
+    const all = lanes(base, { ...shape, seed: 7 });
+    wave.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    wave.setAttribute("stroke-width", shape.pitch - 4);
+    wave.innerHTML = all.map(b => `<path d="${b.d}"/>`).join("");
+    field = all.map((b, i) => ({ node: wave.children[i], at: b.u - 0.09 * (1 - 2 * b.lane / (shape.count - 1)), hot: false }));
+    if (still.matches) light(0.52);
+  }
+
+  function light(position) {
+    for (const b of field) {
+      const hot = Math.abs(b.at - position) < 0.046;
+      if (hot !== b.hot) { b.hot = hot; b.node.classList.toggle("hot", hot); }
+    }
+  }
+
+  function travel(now) {
+    if (!still.matches && !document.hidden) light(-0.2 + (now / 7200 % 1) * 1.4);
+    requestAnimationFrame(travel);
+  }
+
+  new ResizeObserver(drawWave).observe(wave);
+  requestAnimationFrame(travel);
+
+  function drawFlow() {
+    const random = seeded(23);
+    const stream = lanes(spline([[-60, 318], [300, 250], [700, 190], [1060, 122]], 10), { count: 28, pitch: 22, seed: 11, cut: { min: 46, max: 170, gap: 7 } });
+    const pixels = [];
+    for (let x = 0; x < 120; x += 10) for (let y = 0; y < 140; y += 10) if (random() < 0.26) pixels.push(`<rect x="${x}" y="${y}" width="10" height="10"/>`);
+    const clock = minutes => `${String(9 + Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+    const times = Array.from({ length: 6 }, (_, i) => `<tspan x="14" dy="20">${clock(41 + i * 5)} sync</tspan>`).join("");
+    const tag = (x, y, text) => `<rect x="${x}" y="${y - 10}" width="9" height="9" fill="${C.bullet}"/><text x="${x + 18}" y="${y}">${text}</text>`;
+    const faces = { left: "M380 120L500 180V320L380 260Z", right: "M500 180L620 120V260L500 320Z", top: "M500 60L620 120L500 180L380 120Z" };
+
+    document.getElementById("flow").innerHTML =
+      `<g fill="none" stroke="${C.brick}" stroke-width="15">${stream.map(b => `<path d="${b.d}"/>`).join("")}</g>` +
+      `<g fill="${C.device}" stroke="${C.deviceLine}" stroke-width="2">` +
+        `<rect x="58" y="150" width="184" height="124" rx="10"/><rect x="72" y="164" width="156" height="96" rx="3"/><path d="M34 274H266V280A8 8 0 0 1 258 288H42A8 8 0 0 1 34 280Z"/>` +
+        `<rect x="758" y="196" width="188" height="66" rx="16"/><circle cx="922" cy="229" r="3.5" fill="${C.deviceLine}" stroke="none"/><path d="M790 262H914" stroke-width="4"/>` +
+      `</g>` +
+      `<path d="M380 260L500 320L620 260L646 280L526 340L406 280Z" fill="${C.shade}"/>` +
+      `<path d="${faces.left}" fill="${C.yellow}"/><path d="${faces.right}" fill="${C.green}"/><path d="${faces.top}" fill="${C.lilac}"/>` +
+      `<g transform="matrix(1 .5 0 1 380 120)" fill="${C.blue}">${pixels.join("")}</g>` +
+      `<text transform="matrix(1 -.5 0 1 500 180)" y="2" style="font-size:12.5px;letter-spacing:.04em;fill:#0F5231">${times}</text>` +
+      `<text transform="matrix(1 -.5 1 .5 380 120)" x="60" y="66" text-anchor="middle" style="font-size:17px;letter-spacing:0">~/.claude</text>` +
+      `<g fill="none" stroke="${C.ink}" stroke-width="2.5" stroke-linejoin="round">${Object.values(faces).map(d => `<path d="${d}"/>`).join("")}</g>` +
+      `<g fill="none" stroke="${C.ink}" stroke-width="1.5"><path d="M304 70V192H380"/><path d="M696 372V226H620"/></g>` +
+      tag(272, 58, "SESSIONS + MEMORY") + tag(548, 394, "SKILLS + SETTINGS") + tag(96, 322, "THIS MAC") + tag(800, 300, "MAC MINI");
+  }
+
+  function drawStrips() {
+    document.querySelectorAll("[data-strip]").forEach((svg, index) => {
+      const random = seeded(31 + index * 17), accent = C[svg.dataset.strip];
+      const rows = [14, 37, 60].map(y => bricks([[-10, y], [290, y]], random, { min: 30, max: 96, gap: 6 }));
+      const picks = new Set(rows.map((row, r) => `${r}:${1 + Math.floor(random() * Math.max(1, row.length - 2))}`));
+      svg.innerHTML = `<g fill="none" stroke-width="15">${rows.map((row, r) => row.map((b, i) => `<path d="${b.d}" stroke="${picks.has(`${r}:${i}`) ? accent : C.brick}"/>`).join("")).join("")}</g>`;
+    });
+  }
+
+  drawFlow();
+  drawStrips();
+
+  const copy = document.getElementById("copy");
+  copy.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(document.getElementById("command").textContent);
+    copy.textContent = "Copied";
+    setTimeout(() => { copy.textContent = "Copy"; }, 1600);
+  });
+})();
+</script>
+</body>
+</html>
