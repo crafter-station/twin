@@ -1,3 +1,10 @@
 node_modules
 dist
 .DS_Store
+.vercel
+.env*
+*.mp4
+*.mov
+*.mp3
+*.wav
+renders

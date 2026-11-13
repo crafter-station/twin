@@ -1,6 +1,16 @@
-# twin
+<p align="center">
+  <a href="https://twin.crafter.run"><img src="site/og.png" alt="twin: every Mac, the same Claude Code" width="100%"></a>
+</p>
 
-Every Mac, the same Claude Code.
+<h1 align="center">twin</h1>
+
+<p align="center">Every Mac, the same Claude Code.</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@crafter/twin"><img src="https://img.shields.io/npm/v/@crafter/twin?color=1B1B1B&labelColor=EC752C&label=npm" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-1B1B1B?labelColor=EC752C" alt="MIT license"></a>
+  <a href="https://twin.crafter.run"><img src="https://img.shields.io/badge/site-twin.crafter.run-1B1B1B?labelColor=EC752C" alt="twin.crafter.run"></a>
+</p>
 
 `twin` keeps your Claude Code identical across Macs (sessions, memory, skills, settings, prompt history, MCP servers) and turns a Mac mini into a machine you hand work to. It talks plain SSH and rsync, prefers the USB-C cable when it is plugged in, and every command speaks JSON for agents.
 
@@ -32,6 +42,10 @@ twin fetch --here                 # bring this project's changes back
 `twin run` copies the project (never `node_modules` or build output) and its memory to the same path on the mini, then starts headless Claude Code there under `caffeinate`. Close the lid; it keeps working.
 
 ## What syncs
+
+<p align="center">
+  <img src=".github/assets/box.png" alt="The ~/.claude folder as a box travelling between a MacBook and a Mac mini" width="100%">
+</p>
 
 | Scope | What | How |
 |---|---|---|
@@ -69,4 +83,12 @@ The Macs do not need the same account. When the home folders differ (`/Users/cri
 - Never deletes on the other side. Files that get replaced are backed up to `~/.twin/backups`.
 - Do not open the same session on both Macs at once. Separate sessions are fine.
 
+## Site
+
+The landing page at [twin.crafter.run](https://twin.crafter.run) is one static file, `site/index.html`, with every illustration drawn in code.
+
+## License
+
 MIT
+
+<p align="center">Made with 💛 from Latam by <a href="https://crafter.run">Crafter Station</a> · Built by <a href="https://cris.fast">Cristian Correa</a></p>
