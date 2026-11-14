@@ -13,6 +13,7 @@ export const PATHS = {
   sshConfig: join(TWIN_DIR, "ssh_config"),
   sockets: join(TWIN_DIR, "s"),
   backups: join(TWIN_DIR, "backups"),
+  projects: join(TWIN_DIR, "projects"),
   logs: join(TWIN_DIR, "logs"),
   lock: join(TWIN_DIR, "sync.lock"),
 };

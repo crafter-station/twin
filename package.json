@@ -1,6 +1,6 @@
 {
   "name": "@crafter/twin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Make every Mac feel like the same Claude Code. Sync sessions, memory, skills and settings between Macs, and delegate work to a Mac mini.",
   "type": "module",
   "license": "MIT",

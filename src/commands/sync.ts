@@ -73,6 +73,23 @@ export function printReport(report: SyncReport, verbose = false) {
         ui.say(`    ${pc.magenta("↓")} ${pc.dim(f)}`);
     }
   }
+  for (const p of report.scopes.flatMap((s) => s.projects ?? [])) {
+    if (p.missing === "both")
+      ui.warn(`~/${p.path} is on neither Mac. Run twin unlink to drop it.`);
+    const gone = p.deleted.here.length + p.deleted.there.length;
+    if (gone > 0)
+      ui.info(
+        `~/${p.path}: ${gone} deleted ${gone === 1 ? "file" : "files"} moved to ~/.twin/backups`,
+      );
+    for (const c of p.conflicts.slice(0, 12))
+      ui.warn(
+        `~/${p.path}/${c} changed on both Macs. Newer kept, the other copy is in ~/.twin/backups`,
+      );
+    for (const k of p.kept)
+      ui.warn(
+        `~/${p.path}: branch moved on both Macs. Other tip saved as ${k}`,
+      );
+  }
   const total = report.scopes.reduce((n, s) => n + s.up + s.down, 0);
   ui.gap();
   if (total === 0) ui.ok(`Already in sync ${pc.dim(duration(report.ms))}`);

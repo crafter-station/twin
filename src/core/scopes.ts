@@ -1,4 +1,4 @@
-export type ScopeName = "config" | "sessions" | "history" | "mcp";
+export type ScopeName = "config" | "sessions" | "history" | "mcp" | "projects";
 
 export type FileItem = {
   path: string;
@@ -12,6 +12,7 @@ export const SCOPE_NAMES: ScopeName[] = [
   "sessions",
   "history",
   "mcp",
+  "projects",
 ];
 
 export const SCOPE_INFO: Record<ScopeName, string> = {
@@ -19,6 +20,7 @@ export const SCOPE_INFO: Record<ScopeName, string> = {
   sessions: "transcripts, memory, checkpoints, todos",
   history: "prompt history for up-arrow and ctrl+r",
   mcp: "MCP servers in ~/.claude.json",
+  projects: "folders you link with twin link, kept 1:1 both ways",
 };
 
 export const FILE_SCOPES: Partial<Record<ScopeName, FileItem[]>> = {

@@ -5,6 +5,7 @@ import { type Direction, mergeHistory, mergeMcp } from "./merge.ts";
 import { mirror } from "./mirror.ts";
 import { type Route, resolveRoute } from "./net.ts";
 import { PATHS, stamp } from "./paths.ts";
+import { type ProjectReport, syncProjects } from "./projects.ts";
 import { FILE_SCOPES, type ScopeName } from "./scopes.ts";
 import { sh } from "./ssh.ts";
 import { updateState } from "./state.ts";
@@ -14,6 +15,7 @@ export type ScopeReport = {
   up: number;
   down: number;
   files: { up: string[]; down: string[] };
+  projects?: ProjectReport[];
 };
 
 export type SyncReport = {
@@ -78,6 +80,26 @@ export async function sync(peer: Peer, opts: SyncOptions): Promise<SyncReport> {
         up: moved.up.length,
         down: moved.down.length,
         files: moved,
+      });
+      continue;
+    }
+    if (scope === "projects") {
+      const projects = await syncProjects(peer, {
+        push,
+        pull,
+        dryRun: opts.dryRun,
+        force,
+        tag,
+      });
+      const list = (pick: (p: ProjectReport) => string[]) =>
+        projects.flatMap((p) => pick(p).map((f) => `${p.path}/${f}`));
+      const files = { up: list((p) => p.up), down: list((p) => p.down) };
+      scopes.push({
+        scope,
+        up: files.up.length + list((p) => p.deleted.there).length,
+        down: files.down.length + list((p) => p.deleted.here).length,
+        files,
+        projects,
       });
       continue;
     }

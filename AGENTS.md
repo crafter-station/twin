@@ -2,7 +2,7 @@
 
 TypeScript CLI, ESM, Node 20+, macOS only. Built with tsup into `dist/bin/twin.js`; `npm link` exposes `twin`.
 
-- `src/core`: transport and logic. `net.ts` picks the route, `ssh.ts` runs remote scripts through `/bin/sh -c` with a ControlMaster socket, `rsync.ts` wraps the system openrsync (`-a -i -u`, backups with `-b --backup-dir`), `sync.ts` orchestrates scopes, `merge.ts` merges history and MCP servers, `jobs.ts` runs headless `claude -p --output-format stream-json` on the peer, `doctor.ts` holds checks with optional fixes, `launchd.ts` installs agents.
+- `src/core`: transport and logic. `net.ts` picks the route, `ssh.ts` runs remote scripts through `/bin/sh -c` with a ControlMaster socket, `rsync.ts` wraps the system openrsync (`-a -i -u`, backups with `-b --backup-dir`), `sync.ts` orchestrates scopes, `merge.ts` merges history and MCP servers, `projects.ts` syncs linked folders three-way against a manifest of the last sync in `~/.twin/projects` (deletes become moves into backups, branch tips that lose a conflict are kept under `refs/twin/kept`), `jobs.ts` runs headless `claude -p --output-format stream-json` on the peer, `doctor.ts` holds checks with optional fixes, `launchd.ts` installs agents.
 - `src/commands`: one file per command group, thin over core.
 - `src/ui`: `out.ts` is the only place that writes to the terminal; `emit()` prints JSON when `--json` is set.
 - `skill/SKILL.md`: shipped skill, installed by `twin skill` and `twin setup`.

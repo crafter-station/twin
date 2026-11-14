@@ -53,8 +53,20 @@ twin fetch --here                 # bring this project's changes back
 | `sessions` | transcripts, auto memory, checkpoints, todos, plans | rsync, newer wins |
 | `history` | prompt history for ↑ and ctrl+r | line merge, sorted by time |
 | `mcp` | `mcpServers` in `~/.claude.json` | key merge, nothing else in the file is touched |
+| `projects` | folders you link with `twin link`, every file including `.env` and `.git` | three-way against the last sync: edits, deletes and conflicts |
 
 Never synced: credentials (each Mac signs in on its own), plugin caches, `settings.local.json`, shell snapshots and other runtime state.
+
+### Linked folders
+
+```bash
+twin link            # keep this folder 1:1 on both Macs
+twin link --all      # also node_modules and build output
+twin unlink          # stop; the files stay on both Macs
+twin projects        # what is linked
+```
+
+A linked folder rides every `twin sync` and auto sync. twin remembers what both Macs had after the last sync, so it can tell an edit from a delete: a file removed on one Mac is moved to `~/.twin/backups` on the other, and a file changed on both keeps the newer copy and backs up the other. If both Macs commit to the same branch, the newer tip wins and the other is saved under `refs/twin/kept/`, so no commit is lost. Give agents on different Macs their own branches and they never collide.
 
 Use `--only sessions,history`, `--dry-run`, or `push`/`pull` with `--force` to make one side win.
 
@@ -80,7 +92,7 @@ The Macs do not need the same account. When the home folders differ (`/Users/cri
 
 ## Rules that keep it safe
 
-- Never deletes on the other side. Files that get replaced are backed up to `~/.twin/backups`.
+- Never deletes on the other side. Files that get replaced are backed up to `~/.twin/backups`. In a linked folder, a file you delete on one Mac is moved to the backups on the other, not erased.
 - Do not open the same session on both Macs at once. Separate sessions are fine.
 
 ## Site

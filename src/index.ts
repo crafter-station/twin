@@ -13,6 +13,11 @@ import {
 } from "./commands/jobs.ts";
 import { pair } from "./commands/pair.ts";
 import {
+  linkCommand,
+  projectsCommand,
+  unlinkCommand,
+} from "./commands/projects.ts";
+import {
   claudeCommand,
   loginCommand,
   shellCommand,
@@ -23,7 +28,7 @@ import { syncCommand } from "./commands/sync.ts";
 import { SCOPE_INFO, SCOPE_NAMES } from "./core/scopes.ts";
 import { fail, setMode } from "./ui/out.ts";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 
 type Action = (...args: never[]) => Promise<void> | void;
 
@@ -50,6 +55,7 @@ const BANNER = `
 
   ${pc.dim("Every day")}
     twin sync                  two-way sync, newer file wins
+    twin link                  keep this folder 1:1 on both Macs
     twin status                both Macs at a glance
     twin run "fix the tests"   send a task to the other Mac
     twin jobs · logs · fetch   follow it and bring the changes back
@@ -123,6 +129,29 @@ export function run() {
         ),
       );
   }
+
+  program
+    .command("link [dir]")
+    .description(
+      "keep a folder 1:1 on both Macs, every file included (default: here)",
+    )
+    .option("--all", "also sync node_modules and build output")
+    .option("--exclude <names>", "comma list of extra names to skip")
+    .action(
+      guard((dir: string | undefined, _o: unknown, cmd: Command) =>
+        linkCommand(dir, globals(cmd)),
+      ),
+    );
+
+  program
+    .command("unlink [dir]")
+    .description("stop syncing a folder; the files stay on both Macs")
+    .action(guard((dir: string | undefined) => unlinkCommand(dir)));
+
+  program
+    .command("projects")
+    .description("folders linked with twin link")
+    .action(guard(() => projectsCommand()));
 
   program
     .command("status")
