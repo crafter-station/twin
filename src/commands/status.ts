@@ -5,6 +5,7 @@ import { TwinError } from "../core/errors.ts";
 import { isLoadedLocal, SYNC_LABEL } from "../core/launchd.ts";
 import { resolveRoute } from "../core/net.ts";
 import { probeRemote } from "../core/probe.ts";
+import { SCOPE_NAMES } from "../core/scopes.ts";
 import { loadState } from "../core/state.ts";
 import { sync } from "../core/sync.ts";
 import { ago, emit, isJson, spinner, ui } from "../ui/out.ts";
@@ -16,7 +17,7 @@ async function peerStatus(peer: Peer, pending: boolean) {
     const info = await probeRemote(peer);
     const diff = pending
       ? await sync(peer, {
-          scopes: ["config", "sessions", "history", "mcp"],
+          scopes: SCOPE_NAMES,
           direction: "both",
           dryRun: true,
         })

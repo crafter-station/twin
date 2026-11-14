@@ -15,7 +15,13 @@ export type Peer = {
   pairedAt: string;
 };
 
-export type Config = { peers: Record<string, Peer>; defaultPeer?: string };
+export type LinkedProject = { path: string; excludes?: string[] };
+
+export type Config = {
+  peers: Record<string, Peer>;
+  defaultPeer?: string;
+  projects?: LinkedProject[];
+};
 
 export const loadConfig = (): Config =>
   readJson<Config>(PATHS.config, { peers: {} });

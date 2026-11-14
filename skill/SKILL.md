@@ -39,6 +39,21 @@ twin sync --dry-run --json
 
 Auto sync usually runs every 5 minutes (`twin auto on`). Do not open the same session on both Macs at once; separate sessions are fine.
 
+## Linked folders
+
+```bash
+twin link [dir] --json        # keep a folder 1:1 on both Macs (default: here)
+twin unlink [dir] --json      # stop; the files stay on both Macs
+twin projects --json          # what is linked
+twin sync --only projects --json
+```
+
+- A linked folder syncs with every `twin sync` and with auto sync: every file both ways, `.env` files and `.git` included. Only rebuildable folders are skipped (`node_modules`, `.next`, build output); `twin link --all` syncs those too.
+- twin remembers the last sync, so a file deleted on one Mac is removed on the other (moved to `~/.twin/backups`, kept 14 days), and a file changed on both Macs is reported in `projects[].conflicts`: the newer copy wins and the other is in the backups.
+- If both Macs committed to the same branch, the newer tip wins, the other tip is saved as a ref listed in `projects[].kept` (`refs/twin/kept/...`), and its file changes show up as uncommitted work. Tell the user, and merge with `git merge <ref>` if they want both.
+- When agents work on both Macs at once, give each its own branch so they never move the same branch.
+- Use `twin link` when the user wants a folder kept in sync, and `twin send` for a one-off copy.
+
 ## When something is wrong
 
 Run `twin doctor --json`. Each check has `level`, `title`, `hint`, `fixable`. `twin doctor --fix --json` applies the safe fixes. Some steps need the user at a keyboard: `twin pair` (asks the mini password once), `twin login` (Claude sign-in), and `sudo pmset` for sleep. Ask the user to run those themselves with the `!` prefix.

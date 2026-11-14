@@ -33,7 +33,7 @@ export type Root = { path: string; translate?: boolean; excludes?: string[] };
 
 type Entry = { mtime: number; size: number; link: boolean };
 
-type Move = {
+export type Move = {
   local: string;
   remote: string;
   size: number;
@@ -196,7 +196,7 @@ function pipe(
   });
 }
 
-async function send(
+export async function send(
   peer: Peer,
   moves: Move[],
   tag: string,
@@ -246,7 +246,7 @@ async function send(
   }
 }
 
-async function receive(
+export async function receive(
   peer: Peer,
   moves: Move[],
   tag: string,

@@ -33,7 +33,7 @@
   "url": "https://twin.crafter.run",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS",
-  "softwareVersion": "0.1.0",
+  "softwareVersion": "0.2.0",
   "license": "https://opensource.org/licenses/MIT",
   "downloadUrl": "https://www.npmjs.com/package/@crafter/twin",
   "codeRepository": "https://github.com/crafter-station/twin",
@@ -162,6 +162,7 @@
 <nav aria-label="Main">
   <a class="mark" href="/" aria-label="twin home"><svg viewBox="0 0 26 20" fill="currentColor" aria-hidden="true"><rect width="17" height="8" rx="1.5"/><rect x="9" y="12" width="17" height="8" rx="1.5"/></svg>twin</a>
   <div class="links">
+    <a href="/press">Press</a>
     <a href="https://github.com/crafter-station/twin">GitHub</a>
     <a class="solid" href="https://www.npmjs.com/package/@crafter/twin">npm</a>
   </div>
@@ -173,9 +174,9 @@
     <div class="copy">
       <p class="label">For Claude Code · Open source</p>
       <h1>Every Mac, the same Claude Code.</h1>
-      <p class="lede">Sync sessions, memory, skills and settings between your Macs, and hand long work to a Mac mini. Plain SSH and rsync, no cloud in the middle.</p>
+      <p class="lede">Sync sessions, memory, skills, settings and whole project folders between your Macs, and hand long work to a Mac mini. Plain SSH and rsync, no cloud in the middle.</p>
       <div class="install"><code id="command">npm i -g @crafter/twin</code><button type="button" id="copy">Copy</button></div>
-      <p class="meta">v0.1.0 · macOS · MIT</p>
+      <p class="meta">v0.2.0 · macOS · MIT</p>
     </div>
   </section>
 
@@ -183,7 +184,7 @@
     <span class="mark"><svg viewBox="0 0 26 20" fill="currentColor" aria-hidden="true"><rect width="17" height="8" rx="1.5"/><rect x="9" y="12" width="17" height="8" rx="1.5"/></svg>twin</span>
     <svg class="flow" id="flow" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A box holding sessions, memory, skills and settings, travelling between a MacBook and a Mac mini"></svg>
     <h2 id="sync-title">Two-way sync</h2>
-    <p>Newer file wins. Nothing is ever deleted on the other side.</p>
+    <p>Newer file wins. Nothing is ever lost: replaced and deleted files go to backups.</p>
   </section>
 
   <div class="pair">
@@ -194,6 +195,7 @@
         <li><code>twin pair</code><span>Finds the other Mac and trusts it once.</span></li>
         <li><code>twin setup</code><span>Makes it match this Mac and turns on auto sync.</span></li>
         <li><code>twin sync</code><span>Two-way, with backups kept for 14 days.</span></li>
+        <li><code>twin link</code><span>Keeps this project folder 1:1 on both Macs.</span></li>
         <li><code>twin run "fix the tests"</code><span>Runs headless Claude Code on the mini.</span></li>
         <li><code>twin logs -f</code><span>Watches the job live.</span></li>
         <li><code>twin fetch</code><span>Brings its changes and its session back.</span></li>
@@ -208,6 +210,7 @@
         <li><b>Sessions</b><span>Transcripts, auto memory, checkpoints, todos and plans.</span></li>
         <li><b>History</b><span>Prompt history for ↑ and ctrl+r, merged line by line.</span></li>
         <li><b>MCP</b><span>Your MCP servers, and nothing else in that file.</span></li>
+        <li><b>Projects</b><span>Folders you link, every file both ways, <code>.env</code> and <code>.git</code> included.</span></li>
       </ul>
       <p class="note"><b>Never synced:</b> credentials. Each Mac signs in on its own.</p>
     </section>
@@ -226,7 +229,7 @@
 
   <footer class="dark">
     <span>Made with <svg class="heart" viewBox="0 0 24 24" role="img" aria-label="love"><path d="M12 21s-7.5-4.6-9.8-9.1C.6 8.6 2.4 4.5 6.3 4.5c2.3 0 3.9 1.3 5.7 3.4 1.8-2.1 3.4-3.4 5.7-3.4 3.9 0 5.7 4.1 4.1 7.4C19.5 16.4 12 21 12 21z"/></svg> from Latam by <a href="https://crafter.run">Crafter Station</a> · Built by <a rel="author" href="https://cris.fast">Cristian Correa</a></span>
-    <span><a href="https://github.com/crafter-station/twin">GitHub</a> · <a href="https://www.npmjs.com/package/@crafter/twin">npm</a> · MIT License</span>
+    <span><a href="/press">Press kit</a> · <a href="https://github.com/crafter-station/twin">GitHub</a> · <a href="https://www.npmjs.com/package/@crafter/twin">npm</a> · MIT License</span>
   </footer>
 </main>
 
